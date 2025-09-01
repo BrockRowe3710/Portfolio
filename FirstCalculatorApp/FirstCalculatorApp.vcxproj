@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{96471ccd-26b2-4324-954e-bf9d46ae2f3d}</ProjectGuid>
-    <RootNamespace>RoweBPgm1</RootNamespace>
+    <ProjectGuid>{e3d3fd31-1e0a-4bcf-927d-d2ef9bace3fc}</ProjectGuid>
+    <RootNamespace>FirstCalculatorApp</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -123,7 +123,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="RoweB_Pgm1.cpp" />
+    <ClCompile Include="FirstCalculatorApp.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
