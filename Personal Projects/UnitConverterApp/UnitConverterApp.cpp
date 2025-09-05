@@ -1,6 +1,7 @@
 // A simple length unit converter
 // Meters, Kilometers, Feet, Inches included
 // Switch case practice
+// Before knowing loops and functions in C++
 
 #include <iostream>
 #include <iomanip>
