@@ -1,0 +1,21 @@
+CS2010 Grade Report
+===================
+Count        : 40
+Minimum      : 0
+Maximum      : 100
+Average      : 74.03
+
+Letter Grades
+A (90-100): 10
+B (80-89) : 9
+C (70-79) : 8
+D (60-69) : 6
+F (<60)   : 7
+
+Histogram (each * = 1 student)
+A: **********
+B: *********
+C: ********
+D: ******
+F: *******
+
