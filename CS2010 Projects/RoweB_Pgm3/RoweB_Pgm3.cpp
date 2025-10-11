@@ -31,6 +31,7 @@ using namespace std;
 
 int main() {
     // Seed the computer choice RNG
+    // Otherwise program gives the same output every time
     srand(time(0));
 
     // Declare Rock, Paper, Scissors, Lizard, Spock
@@ -41,7 +42,8 @@ int main() {
     const char SPOCK = 'V';
 
     // Declare choices
-    char userChoice = 'Y';
+    char userChoice;
+    char playAgain = 'Y';
     int computerRandom;
     char computerChoice;
 
@@ -52,10 +54,17 @@ int main() {
 
     cout << "Welcome to Rock, Paper, Scissors, Lizard, Spock!" << endl << endl;
 
-    while (userChoice != 'n' && userChoice != 'N') {
+    while (toupper(playAgain) != 'N') {
         // Take in user choice
         cout << "Enter R for Rock, P for Paper, S for Scissors, L for Lizard, or V for Spock: ";
         cin >> userChoice;
+        userChoice = toupper(userChoice);
+
+        // Check if user input is valid
+        if (userChoice != ROCK && userChoice != PAPER && userChoice != SCISSORS && userChoice != LIZARD && userChoice != SPOCK) {
+            cout << "Invalid input, please try again" << endl << endl;
+            continue;
+        }
 
         // Choose the computer's choice
         computerRandom = rand() % 5;
@@ -191,13 +200,18 @@ int main() {
                 ++ties;
             }
         }
-        else {
-            cout << "Invalid input, please try again";
-        }
+        cout << endl << endl;
 
         // Prompt the user to play again
-        cout << endl << endl << "Play again? (Y/N): ";
-        cin >> userChoice;
+        cout << "Play again? (Y/N): ";
+        cin >> playAgain;
+
+        while (toupper(playAgain) != 'N' && toupper(playAgain) != 'Y') {
+            cout << "Invalid input, please try again" << endl << endl;
+            cout << "Play again? (Y/N): ";
+            cin >> playAgain;
+        }
+
         cout << endl;
     }
 
