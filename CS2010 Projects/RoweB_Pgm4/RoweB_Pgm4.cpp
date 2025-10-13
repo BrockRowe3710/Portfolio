@@ -38,7 +38,6 @@ int main()
     const int MONTH_WIDTH = 15;
     const int DATA_WIDTH = 10;
 
-    string line = "";
     string month = "";
     string highestMonth = "";
     string lowestMonth = "";
