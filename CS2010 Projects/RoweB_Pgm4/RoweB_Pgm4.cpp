@@ -67,6 +67,9 @@ int main()
         dataFile >> month >> PCEYear1 >> PCEYear2;
 
         outputFile << fixed << setprecision(3) << left;
+        if (month == "Month") {
+            outputFile << setprecision(0); // Print years without a decimal
+        }
         outputFile << setw(MONTH_WIDTH) << month << setw(DATA_WIDTH) << PCEYear1 << setw(DATA_WIDTH) << PCEYear2;
 
         // Give a different output for the header

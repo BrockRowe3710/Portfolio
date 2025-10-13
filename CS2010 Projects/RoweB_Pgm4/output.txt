@@ -1,4 +1,4 @@
-Month          2023.000  2024.000  YoY Inflation Rate
+Month          2023      2024      YoY Inflation Rate
 January        117.505   121.217   3.16%
 February       117.929   121.537   3.06%
 March          118.315   122.009   3.12%
