@@ -10,6 +10,10 @@ void Character::SetHealth(int health) {
 	this->health = health;
 }
 
+void Character::SetMaxHealth(int maxHealth) {
+	this->maxHealth = maxHealth;
+}
+
 void Character::SetName(string name) {
 	this->name = name;
 }
@@ -21,11 +25,16 @@ void Character::SetWeapon(Weapon weapon) {
 void Character::SetCharacter(string name, int health, Weapon weapon) {
 	this->name = name;
 	this->health = health;
+	this->maxHealth = health;
 	this->weapon = weapon;
 }
 
 int Character::GetHealth() const {
 	return health;
+}
+
+int Character::GetMaxHealth() const {
+	return maxHealth;
 }
 
 string Character::GetName() const {
