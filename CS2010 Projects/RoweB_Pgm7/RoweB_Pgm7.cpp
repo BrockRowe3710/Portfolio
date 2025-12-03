@@ -3,7 +3,7 @@
 #include <string>
 #include <fstream>
 
-// FIXME: Make sortByLastName
+// FIXME: Implement adding students
 
 using namespace std;
 
@@ -81,6 +81,8 @@ int main()
         choice = getUserChoiceLASQ();
     }
 
+    updateRoster(cnt, name, id, classification, gpa);
+
     return 0;
 }
 
@@ -153,7 +155,6 @@ char getUserChoiceLIB()
         cout << "Select lookup criterion.\n";
         cout << "Type L to look up by last name, type I to look up by ID, type B to go back: ";
         cin >> inputLIB;
-        cout << "\n";
 
         switch (inputLIB) {
         case 'l':
@@ -164,6 +165,7 @@ char getUserChoiceLIB()
             return 'i';
         case 'b':
         case 'B':
+            cout << endl;
             return 'b';
         default:
             cout << "Error: Invalid Input. Try again.\n\n";
@@ -245,16 +247,28 @@ void swapRecords(int index, int min, string name[CLASS_CAP][2], int id[CLASS_CAP
 // Modified selection sort to sort by last name, then first name
 void sortByLastName(int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string classification[], double GPA[CLASS_CAP])
 {
+    int min;
+
+    for (int i = 0; i < cnt; ++i) {
+        min = i;
+        for (int j = i; j < cnt; ++j) {
+            if (name[j][0] < name[min][0]) {
+                min = j;
+            }
+            if (name[j][0] == name[min][0]) {
+                if (name[j][1] < name[min][1]) {
+                    min = j;
+                }
+            }
+        }
+        swapRecords(i, min, name, id, classification, GPA);
+    }
 }
 
 // Insertion sort to sort by ID
 void sortByID(int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string classification[], double GPA[CLASS_CAP])
 {
     for (int i = 1; i < cnt; ++i) {
-        if (id[i] > id[i - 1]) {
-            continue;
-        }
-
         for (int j = i; j > 0; --j) {
             if (id[j] < id[j - 1]) {
                 swapRecords(j, j - 1, name, id, classification, GPA);
@@ -266,14 +280,57 @@ void sortByID(int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string clas
     }
 }
 
+// Binary search by last name key
 int search(string key, int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string classification[], double GPA[CLASS_CAP])
 {
-    return 0;
+    int low = 0;
+    int high = cnt;
+    int mid;
+
+    sortByLastName(cnt, name, id, classification, GPA);
+
+    while (high >= low) {
+        mid = low + (high - low) / 2;
+        if (name[mid][0] == key) {
+            return mid;
+        }
+        else if (name[mid][0] > key) {
+            high = mid - 1;
+        }
+        else {
+            low = mid + 1;
+        }
+    }
+
+    return -1;
 }
 
+// Binary search by ID using 6-digit key
 int search(int key, int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string classification[], double GPA[CLASS_CAP])
 {
-    return 0;
+    int low = 0;
+    int high = cnt;
+    int mid;
+
+    sortByID(cnt, name, id, classification, GPA);
+
+    while (high >= low) {
+        mid = low + (high - low) / 2;
+        if (id[mid] == key) {
+            if (mid != 0 && id[mid] == id[mid - 1]) {
+                return mid - 1;
+            }
+            return mid;
+        }
+        else if (id[mid] > key) {
+            high = mid - 1;
+        }
+        else {
+            low = mid + 1;
+        }
+    }
+
+    return -1;
 }
 
 int doAction(char choice, int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string classification[], double GPA[CLASS_CAP])
@@ -296,68 +353,58 @@ int doAction(char choice, int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP],
 
 void lookUp(int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string classification[], double GPA[CLASS_CAP])
 {
-    int studentsFound = 0;
+    int index = -1;
 
     char choice = getUserChoiceLIB();
 
-    if (choice == 'l') {
-        string lastName;
+    if (choice == 'b') {
+        return;
+    }
+    else if (choice == 'l') {
+        string key;
         cout << "Enter the last name: ";
-        cin >> lastName;
+        cin >> key;
         cout << endl;
 
-        lastName = formatName(lastName);
+        key = formatName(key);
 
-        for (int i = 0; i < cnt; ++i) {
-            if (name[i][0] == lastName) {
-                if (studentsFound == 0) {
-                    printHeaderRow();
-                }
+        index = search(key, cnt, name, id, classification, GPA);
 
-                printOneRec(i, name, id, classification, GPA);
-
-                ++studentsFound;
-            }
-        }
-
-        if (studentsFound == 0) {
+        if (index == -1) {
             cout << "No record has been found.\n\n";
         }
         else {
-            cout << studentsFound << " student record(s) were found.\n\n";
+            printHeaderRow();
+            printOneRec(index, name, id, classification, GPA);
+            if (index != cnt && name[index][0] == name[index + 1][0]) {
+                printOneRec(index + 1, name, id, classification, GPA);
+                cout << "2 student record(s) were found.\n\n";
+            }
+            else {
+                cout << "1 student record(s) were found.\n\n";
+            }
         }
     }
     else if (choice == 'i') {
-        int userID;
+        int key;
         cout << "Enter the student's 6-digit ID or enter -1 to return to the main menu: ";
-        cin >> userID;
+        cin >> key;
         cout << endl;
 
-        if (userID == -1) {
+        if (key == -1) {
             return;
         }
-        
-        for (int i = 0; i < cnt; ++i) {
-            if (id[i] == userID) {
-                if (studentsFound == 0) {
-                    printHeaderRow();
-                }
 
-                printOneRec(i, name, id, classification, GPA);
+        index = search(key, cnt, name, id, classification, GPA);
 
-                ++studentsFound;
-            }
-        }
-
-        if (studentsFound == 0) {
+        if (index == -1) {
             cout << "No record has been found.\n\n";
         }
         else {
-            cout << studentsFound << " student record(s) were found.\n\n";
+            printHeaderRow();
+            printOneRec(index, name, id, classification, GPA);
+            cout << "1 student record(s) were found.\n\n";
         }
-    }
-    else {
-        return;
     }
 }
 
@@ -368,10 +415,17 @@ int addStudent(int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string cla
 
 void showRoster(int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string classification[], double GPA[CLASS_CAP])
 {
+    sortByLastName(cnt, name, id, classification, GPA);
+
+    for (int i = 0; i < cnt; ++i) {
+        printOneRec(i, name, id, classification, GPA);
+    }
+
+    cout << endl;
 }
 
 /* TEMP PRINT ALL VALUES
-for (int i = 0; i < CLASS_CAP; ++i) {
+for (int i = 0; i < cnt; ++i) {
     printOneRec(i, name, id, classification, gpa);
 }
 */
