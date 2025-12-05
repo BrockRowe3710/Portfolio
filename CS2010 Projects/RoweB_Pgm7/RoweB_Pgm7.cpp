@@ -3,7 +3,7 @@
 #include <string>
 #include <fstream>
 
-// FIXME: Implement adding students
+// FIXME: Add UpdateRoster Functionality
 
 using namespace std;
 
@@ -90,6 +90,8 @@ int readRoster(string name[CLASS_CAP][2], int id[CLASS_CAP], string classificati
 {
     int index = 0;
     string skipLine;
+    string fullName;
+    int charPos;
 
     ifstream inputFile(INPUT);
     if (!inputFile.is_open()) {
@@ -99,8 +101,13 @@ int readRoster(string name[CLASS_CAP][2], int id[CLASS_CAP], string classificati
     getline(inputFile, skipLine);
 
     while (index < CLASS_CAP && !inputFile.eof()) {
-        inputFile >> name[index][0] >> name[index][1] >> id[index] >> classification[index] >> GPA[index];
-        name[index][0].pop_back();
+        inputFile >> fullName >> id[index] >> classification[index] >> GPA[index];
+        getline(inputFile, skipLine);
+        
+        charPos = fullName.find(',');
+        name[index][0] = fullName.substr(charPos + 1);
+        name[index][1] = fullName.substr(0, charPos);
+
         ++index;
     }
     
@@ -175,22 +182,75 @@ char getUserChoiceLIB()
 
 int getID()
 {
-    return 0;
+    int newID;
+
+    while (true) {
+        cout << "Enter the student's 6-digit ID or enter -1 to return to the main menu: ";
+        cin >> newID;
+
+        if (newID == -1 || (newID >= 100000 && newID <= 999999)) {
+            return newID;
+        }
+        else {
+            cout << "Invalid Student ID. Try again.\n\n";
+        }
+    }
 }
 
 string getClassification()
 {
-    return string();
+    int newClassification;
+
+    while (true) {
+        cout << "Enter the student's classification. Type 1 for freshman, 2 for sophomore, 3 for junior, "
+            << "4 for senior, or -1 to return to the main menu: ";
+        cin >> newClassification;
+
+        switch (newClassification) {
+        case -1:
+            return "-1";
+        case 1:
+            return "Freshman";
+        case 2:
+            return "Sophomore";
+        case 3:
+            return "Junior";
+        case 4:
+            return "Senior";
+        default:
+            cout << "Error: Invalid Classification. Try again.\n\n";
+        }
+    }
 }
 
 double getGPA()
 {
-    return 0.0;
+    double newGPA;
+
+    while (true) {
+        cout << "Enter the student's GPA or -1 to return to the main menu: ";
+        cin >> newGPA;
+
+        if (newGPA > -1.0001 && newGPA < -0.9999) {
+            return newGPA;
+        }
+        if (newGPA > -0.0001 && newGPA < 4.0001) {
+            return newGPA;
+        }
+        else {
+            cout << "Error: Invalid GPA. Try again.\n\n";
+        }
+    }
 }
 
 int checkForDuplicateName(string newFirst, int pos, int cnt, string name[CLASS_CAP][2])
 {
-    return 0;
+    if (newFirst == name[pos][1]) {
+        return pos;
+    }
+    else {
+        return -1;
+    }
 }
 
 string formatName(string n)
@@ -255,7 +315,7 @@ void sortByLastName(int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], strin
             if (name[j][0] < name[min][0]) {
                 min = j;
             }
-            if (name[j][0] == name[min][0]) {
+            else if (name[j][0] == name[min][0]) {
                 if (name[j][1] < name[min][1]) {
                     min = j;
                 }
@@ -284,10 +344,8 @@ void sortByID(int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string clas
 int search(string key, int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string classification[], double GPA[CLASS_CAP])
 {
     int low = 0;
-    int high = cnt;
+    int high = cnt - 1;
     int mid;
-
-    sortByLastName(cnt, name, id, classification, GPA);
 
     while (high >= low) {
         mid = low + (high - low) / 2;
@@ -309,10 +367,8 @@ int search(string key, int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], st
 int search(int key, int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string classification[], double GPA[CLASS_CAP])
 {
     int low = 0;
-    int high = cnt;
+    int high = cnt - 1;
     int mid;
-
-    sortByID(cnt, name, id, classification, GPA);
 
     while (high >= low) {
         mid = low + (high - low) / 2;
@@ -368,6 +424,7 @@ void lookUp(int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string classi
 
         key = formatName(key);
 
+        sortByLastName(cnt, name, id, classification, GPA);
         index = search(key, cnt, name, id, classification, GPA);
 
         if (index == -1) {
@@ -395,6 +452,7 @@ void lookUp(int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string classi
             return;
         }
 
+        sortByID(cnt, name, id, classification, GPA);
         index = search(key, cnt, name, id, classification, GPA);
 
         if (index == -1) {
@@ -410,7 +468,73 @@ void lookUp(int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string classi
 
 int addStudent(int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string classification[], double GPA[CLASS_CAP])
 {
-    return 0;
+    string newLastName;
+    string newFirstName;
+    int newID;
+    string newClassification;
+    double newGPA;
+
+    if (cnt == CLASS_CAP) {
+        cout << "Error: Class enrollment has reached the cap.\n\n";
+        return cnt;
+    }
+
+    cout << "Enter the student's last name or type ! to return to the main menu: ";
+    cin >> newLastName;
+    if (newLastName == "!") {
+        cout << endl;
+        return cnt;
+    }
+    newLastName = formatName(newLastName);
+
+    cout << "Enter the student's first name or type ! to return to the main menu: ";
+    cin >> newFirstName;
+    if (newFirstName == "!") {
+        cout << endl;
+        return cnt;
+    }
+    newFirstName = formatName(newFirstName);
+
+    for (int i = 0; i < cnt; ++i) {
+        if (name[i][0] == newLastName) {
+            int dupeCheck = checkForDuplicateName(newFirstName, i, cnt, name);
+
+            if (dupeCheck != -1) {
+                cout << endl << newLastName << ", " << newFirstName << " is already enrolled.\n";
+                printOneRec(dupeCheck, name, id, classification, GPA);
+                cout << endl;
+                return cnt;
+            }
+        }
+    }
+
+    newID = getID();
+    if (newID == -1) {
+        cout << endl;
+        return cnt;
+    }
+
+    newClassification = getClassification();
+    if (newClassification == "-1") {
+        cout << endl;
+        return cnt;
+    }
+
+    newGPA = getGPA();
+    if (newGPA > -1.0001 && newGPA < -0.9999) {
+        cout << endl;
+        return cnt;
+    }
+
+    name[cnt][0] = newLastName;
+    name[cnt][1] = newFirstName;
+    id[cnt] = newID;
+    classification[cnt] = newClassification;
+    GPA[cnt] = newGPA;
+
+    cout << endl << "Student added successfully.\n\n";
+
+    return cnt + 1;
 }
 
 void showRoster(int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string classification[], double GPA[CLASS_CAP])
@@ -423,9 +547,3 @@ void showRoster(int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string cl
 
     cout << endl;
 }
-
-/* TEMP PRINT ALL VALUES
-for (int i = 0; i < cnt; ++i) {
-    printOneRec(i, name, id, classification, gpa);
-}
-*/
