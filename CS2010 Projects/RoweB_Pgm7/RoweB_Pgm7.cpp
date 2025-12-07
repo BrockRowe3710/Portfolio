@@ -1,9 +1,32 @@
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+// Program: Program 7, RoweB_Pgm7.cpp, 12/07/2025
+// Take a roster of students from a file and let the user look up, 
+// add, and show students. The input file is updated after quitting.
+// Process: Takes in a file with student information and saves it into arrays.
+// Then, the user can edit the roster or find students in the roster by their
+// last name or ID, add them with new information, or show the roster, all in
+// a loop that updates when quit.
+// Results: The input file is updated with new students and reformatted.
+//
+// Class: CS2010
+// Section: 1001
+// Term: Fall 2025
+// Author: Brock Rowe
+//
+// Reflection: I liked this program a lot, mostly because I felt like I was
+// developing a deeper understanding of the code because it was more complex
+// than the other program. I liked making search and sort functions, as I
+// hadn't really done that on my own time. I also liked working with so many
+// functions and realizing that I had already created the tools that I needed
+// to solve a problem. The hardest part was making sure that everything fit
+// into the constraints of the assignment, but I liked that it made me think
+// about how I could approach problems differently.
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
 #include <iostream>
 #include <iomanip>
 #include <string>
 #include <fstream>
-
-// FIXME: Add UpdateRoster Functionality
 
 using namespace std;
 
@@ -12,6 +35,7 @@ const int CLASS_CAP = 35;
 const string INPUT = "pgm7.txt";
 const int COL_WIDTH = 20;
 
+// All function declarations
 int readRoster(string name[CLASS_CAP][2], int id[CLASS_CAP], string classification[], double GPA[CLASS_CAP]);
 
 int updateRoster(int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string classification[], double GPA[CLASS_CAP]);
@@ -54,7 +78,7 @@ void showRoster(int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string cl
 
 int main()
 {
-    // Name by last, first
+    // Name by last, then first
     string name[CLASS_CAP][2];
     int id[CLASS_CAP];
     string classification[CLASS_CAP];
@@ -62,9 +86,6 @@ int main()
 
     // Initial student count
     int cnt = 0;
-
-    // Check if a function worked as intended
-    int checkValidity;
 
     // Read the file into name, id, classification, and gpa, returns student count
     cnt = readRoster(name, id, classification, gpa);
@@ -75,23 +96,30 @@ int main()
 
     char choice = getUserChoiceLASQ();
 
+    // Main menu loop
     while (choice != 'q') {
         cnt = doAction(choice, cnt, name, id, classification, gpa);
 
         choice = getUserChoiceLASQ();
     }
 
-    updateRoster(cnt, name, id, classification, gpa);
+    // Updates the input file with the new student information
+    cnt = updateRoster(cnt, name, id, classification, gpa);
+    if (cnt == -1) {
+        cout << "Error: File open failed.\n";
+        return 1;
+    }
+
+    cout << "Roster updated to " << INPUT << endl;
 
     return 0;
 }
 
+// Reads INPUT to get student information
 int readRoster(string name[CLASS_CAP][2], int id[CLASS_CAP], string classification[], double GPA[CLASS_CAP])
 {
     int index = 0;
     string skipLine;
-    string fullName;
-    int charPos;
 
     ifstream inputFile(INPUT);
     if (!inputFile.is_open()) {
@@ -100,14 +128,11 @@ int readRoster(string name[CLASS_CAP][2], int id[CLASS_CAP], string classificati
 
     getline(inputFile, skipLine);
 
+    // Store student information
     while (index < CLASS_CAP && !inputFile.eof()) {
-        inputFile >> fullName >> id[index] >> classification[index] >> GPA[index];
+        inputFile >> name[index][0] >> name[index][1] >> id[index] >> classification[index] >> GPA[index];
         getline(inputFile, skipLine);
-        
-        charPos = fullName.find(',');
-        name[index][0] = fullName.substr(charPos + 1);
-        name[index][1] = fullName.substr(0, charPos);
-
+        name[index][0].pop_back();
         ++index;
     }
     
@@ -121,15 +146,45 @@ int readRoster(string name[CLASS_CAP][2], int id[CLASS_CAP], string classificati
     return index;
 }
 
+// Update INPUT with new information and formatting
 int updateRoster(int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string classification[], double GPA[CLASS_CAP])
 {
-    return 0;
+    string fullName;
+
+    ofstream outputFile(INPUT);
+    if (!outputFile.is_open()) {
+        return -1;
+    }
+
+    // Write the header to the file
+    outputFile << "   " << left << fixed << setprecision(2) 
+        << setw(COL_WIDTH) << "Last, First" << setw(COL_WIDTH) << "ID"
+        << setw(COL_WIDTH) << "Classification" << setw(COL_WIDTH) << "GPA";
+
+    // Write each student by line
+    sortByLastName(cnt, name, id, classification, GPA);
+
+    for (int i = 0; i < cnt; ++i) {
+        fullName = name[i][0] + ", " + name[i][1];
+
+        outputFile << endl << setw(3) << i + 1
+            << setw(COL_WIDTH) << fullName
+            << setw(COL_WIDTH) << id[i]
+            << setw(COL_WIDTH) << classification[i]
+            << setw(COL_WIDTH) << GPA[i];
+    }
+
+    outputFile.close();
+
+    return cnt;
 }
 
+// Let the user look up, add, or show students, then goes to doAction()
 char getUserChoiceLASQ()
 {
     char inputLASQ;
     
+	// Case insensitive input validation loop
     while (true) {
         cout << "What to do [ L(ook up), A(dd), S(how), Q(uit) ]? ";
         cin >> inputLASQ;
@@ -154,10 +209,12 @@ char getUserChoiceLASQ()
     }
 }
 
+// Lets user search by last name or ID, used in lookUp()
 char getUserChoiceLIB()
 {
     char inputLIB;
 
+	// Case insensitive input validation loop
     while (true) {
         cout << "Select lookup criterion.\n";
         cout << "Type L to look up by last name, type I to look up by ID, type B to go back: ";
@@ -180,6 +237,7 @@ char getUserChoiceLIB()
     }
 }
 
+// Validates an added student's ID
 int getID()
 {
     int newID;
@@ -197,6 +255,7 @@ int getID()
     }
 }
 
+// Validates an added student's classification
 string getClassification()
 {
     int newClassification;
@@ -223,6 +282,7 @@ string getClassification()
     }
 }
 
+// Validates an added student's GPA
 double getGPA()
 {
     double newGPA;
@@ -231,10 +291,10 @@ double getGPA()
         cout << "Enter the student's GPA or -1 to return to the main menu: ";
         cin >> newGPA;
 
-        if (newGPA > -1.0001 && newGPA < -0.9999) {
+        if (newGPA == -1.0) {
             return newGPA;
         }
-        if (newGPA > -0.0001 && newGPA < 4.0001) {
+        if (newGPA >= 0.0 && newGPA <= 4.0) {
             return newGPA;
         }
         else {
@@ -243,16 +303,21 @@ double getGPA()
     }
 }
 
+// Check if a student is in the roster based on sharing the same last name at index pos
 int checkForDuplicateName(string newFirst, int pos, int cnt, string name[CLASS_CAP][2])
 {
     if (newFirst == name[pos][1]) {
         return pos;
+    }
+    else if (pos < cnt - 1 && newFirst == name[pos + 1][1]) {
+        return pos + 1;
     }
     else {
         return -1;
     }
 }
 
+// Uppercases the first letter of names
 string formatName(string n)
 {
     n[0] = toupper(n[0]);
@@ -260,16 +325,18 @@ string formatName(string n)
     return n;
 }
 
+// Prints the top row to show columns of student information
 void printHeaderRow()
 {
     cout << left << setprecision(2)
-        << setw(COL_WIDTH) << "Last,First"
+        << setw(COL_WIDTH) << "Last, First"
         << setw(COL_WIDTH) << "ID"
         << setw(COL_WIDTH) << "Classification"
         << setw(COL_WIDTH) << "GPA"
         << endl;
 }
 
+// Prints the record of one student in colums of COL_WIDTH width
 void printOneRec(int index, string name[CLASS_CAP][2], int id[CLASS_CAP], string classification[], double GPA[CLASS_CAP])
 {
     string fullName = name[index][0] + ", " + name[index][1];
@@ -282,6 +349,7 @@ void printOneRec(int index, string name[CLASS_CAP][2], int id[CLASS_CAP], string
         << endl;
 }
 
+// Switch two records in the arrays with temporary variables
 void swapRecords(int index, int min, string name[CLASS_CAP][2], int id[CLASS_CAP], string classification[], double GPA[CLASS_CAP])
 {
     string tempName[1][2];
@@ -389,6 +457,7 @@ int search(int key, int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], strin
     return -1;
 }
 
+// Does the action chosen from getUserChoiceLASQ()
 int doAction(char choice, int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string classification[], double GPA[CLASS_CAP])
 {
     if (choice == 'l') {
@@ -401,12 +470,13 @@ int doAction(char choice, int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP],
         showRoster(cnt, name, id, classification, GPA);
     }
     else if (choice == 'q') {
-        cnt = updateRoster(cnt, name, id, classification, GPA);
+        return cnt;
     }
 
     return cnt;
 }
 
+// Find a student with search() by using either their last name or id
 void lookUp(int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string classification[], double GPA[CLASS_CAP])
 {
     int index = -1;
@@ -466,6 +536,7 @@ void lookUp(int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string classi
     }
 }
 
+// Add a student to the roster, ensures that the student is unique
 int addStudent(int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string classification[], double GPA[CLASS_CAP])
 {
     string newLastName;
@@ -495,17 +566,18 @@ int addStudent(int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string cla
     }
     newFirstName = formatName(newFirstName);
 
-    for (int i = 0; i < cnt; ++i) {
-        if (name[i][0] == newLastName) {
-            int dupeCheck = checkForDuplicateName(newFirstName, i, cnt, name);
+	// Check for duplicate names by searching last names, then first names that match
+    int dupeCheck = -1;
+    int index = search(newLastName, cnt, name, id, classification, GPA);
+    if (index != -1) {
+        dupeCheck = checkForDuplicateName(newFirstName, index, cnt, name);
+    }
 
-            if (dupeCheck != -1) {
-                cout << endl << newLastName << ", " << newFirstName << " is already enrolled.\n";
-                printOneRec(dupeCheck, name, id, classification, GPA);
-                cout << endl;
-                return cnt;
-            }
-        }
+    if (dupeCheck != -1) {
+        cout << endl << newLastName << ", " << newFirstName << " is already enrolled.\n";
+        printOneRec(dupeCheck, name, id, classification, GPA);
+        cout << endl;
+        return cnt;
     }
 
     newID = getID();
@@ -521,7 +593,7 @@ int addStudent(int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string cla
     }
 
     newGPA = getGPA();
-    if (newGPA > -1.0001 && newGPA < -0.9999) {
+    if (newGPA == -1.0) {
         cout << endl;
         return cnt;
     }
@@ -537,11 +609,16 @@ int addStudent(int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string cla
     return cnt + 1;
 }
 
+// Prints the roster to the user by last name
 void showRoster(int cnt, string name[CLASS_CAP][2], int id[CLASS_CAP], string classification[], double GPA[CLASS_CAP])
 {
     sortByLastName(cnt, name, id, classification, GPA);
 
+    cout << "   ";
+    printHeaderRow();
+
     for (int i = 0; i < cnt; ++i) {
+        cout << setw(3) << left << i + 1;
         printOneRec(i, name, id, classification, GPA);
     }
 
